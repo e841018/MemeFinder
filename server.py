@@ -49,17 +49,21 @@ def dev_cb(sid, data):
     print('dev received:', data)
 
 @sio.on('query')
-def query_cb(sid, data):
-    print('query received:', data)
-    fb_list, text_query, n_ranklist = data
-    ids = retrieve(fb_list, n_ranklist)
+def query_cb(sid, query):
+    print('query received:', query)
+    img_query = query['img_query']
+    text_query = query['text_query']
+    n_ranklist = query['n_ranklist']
+    ids = retrieve(img_query, n_ranklist)
     sio.emit('rank_list', ids)
 
 #===============================================================================
 # start server
 
-green_socket = eventlet.listen(('127.0.0.1', 8080))
-# start wsgi server (blocking)
-print('Server is online!')
+address = '127.0.0.1'
+port = 8080
+green_socket = eventlet.listen((address, port))
+print(f'Server is online at {address}:{port}')
 print('=' * 80)
+# start wsgi server (blocking)
 eventlet.wsgi.server(green_socket, app, log_output=False)

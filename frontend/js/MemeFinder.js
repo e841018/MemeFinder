@@ -59,8 +59,9 @@ function sendQuery() {
         query_list.push(Number(el.id));
     }
     const n_ranklist = Number(slider_result.value);
-    socket.emit('query', [query_list, text_query.value, n_ranklist]);
-    console.log('send query:', query_list);
+    const query = {'img_query': query_list, 'text_query': text_query.value, 'n_ranklist': n_ranklist}
+    socket.emit('query', query);
+    console.log('send query:', query);
 }
 
 function sliderResultOnInput(event) {
@@ -95,6 +96,5 @@ window.onload = function() {
 
 /*
 TODOs:
- * add slider to adjust image size
  * right click to enlarge image
 */

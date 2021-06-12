@@ -10,7 +10,7 @@ body{
 }
 
 header{
-	height: 90px;
+	height: 100px;
 	margin: 5px;
 	text-align: left;
 	white-space: nowrap;
@@ -22,7 +22,7 @@ header{
 }
 
 .controls{
-	height: 25px;
+	height: 30px;
 	font-size: 20px;
 }
 
@@ -32,12 +32,12 @@ header{
 
 #text-query{
 	font-size: 20px;
-	width: calc(100vw - 93px);
+	width: calc(100vw - 95px);
 }
 
 #flex-container{
 	flex-grow: 1; /* fill (vertical) blank */
-	max-height: calc(100vh - 110px);
+	max-height: calc(100vh - 120px);
 	display: flex; /* flex container */
 	flex-direction: row;
 }
