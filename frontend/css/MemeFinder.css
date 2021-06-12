@@ -62,6 +62,10 @@ header{
 	overflow-y: scroll;
 }
 
+div{
+	user-select: text;
+}
+
 h1{
 	margin: 10px;
 	font-size: 20px;
@@ -73,7 +77,7 @@ h1{
 	min-width: 200px;
 	min-height: 205px;
 	padding: 10px;
-	vertical-align: top;
+	vertical-align: baseline;
 	text-align: center;
 }
 
