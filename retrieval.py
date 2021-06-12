@@ -67,8 +67,14 @@ def retrieve(feedback_ids, n_ranklist=10):
     for id_ in feedback_ids:
         idx = id2idx[id_]
         average_vec += features[idx]
-    average_vec /= len(feedback_ids)
+    if len(feedback_ids) > 0:
+        average_vec /= len(feedback_ids)
 
     # find nearest neighbors
     ids = retrieve_cosine(average_vec, n_ranklist)
     return ids
+
+if __name__ == '__main__':
+    from code import InteractiveConsole
+    console = InteractiveConsole(locals=locals())
+    console.interact()

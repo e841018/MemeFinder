@@ -1,5 +1,3 @@
-from time import time, sleep
-
 from flask import Flask, send_from_directory
 import socketio
 import eventlet, eventlet.wsgi
