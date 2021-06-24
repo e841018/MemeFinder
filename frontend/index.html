@@ -14,12 +14,14 @@
                 MemeFinder: Search engine for unstructured personal meme collections
             </div>
             <div class="controls">
-                <div class="controls-inner">Press enter to send a query. </div>
-                <div class="controls-inner">Importance of keywords: </div>
-                <input class="controls-inner" id="slider-weight" type="range" min="0" max="1" step="0.01" value="0.5">
+                <div class="controls-inner"><input class="button" type="button" id="enter" value="Enter">: Send a query. &nbsp;</div>
+                <div class="controls-inner"><input class="button" type="button" id="undo" value="Ctrl+Z">: Undo. &nbsp;</div>
+                <div class="controls-inner" id="right-click">Right-click on images: Enlarge.</div>
             </div>
             <div class="controls">
-                <div class="controls-inner">Keywords: </div>
+                <div class="controls-inner">Importance of keywords: </div>
+                <input id="slider-weight" type="range" min="0" max="1" step="0.01" value="0.5">
+                <div class="controls-inner">&nbsp;Keywords: </div>
                 <input id="text-query" type="text"></input>
             </div>
         </header>

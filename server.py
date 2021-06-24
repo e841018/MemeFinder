@@ -12,8 +12,13 @@ from Eric.retrieval import retrieve
 app = Flask(__name__)
 
 @app.route('/')
+@app.route('/index.html')
 def index():
     return send_from_directory('frontend', 'index.html')
+
+@app.route('/eval')
+def index_eval():
+    return send_from_directory('frontend', 'eval.html')
 
 @app.route('/css/<string:path>')
 def send_css(path):
@@ -40,10 +45,10 @@ app = socketio.WSGIApp(sio, app)
 @sio.on('connect')
 def connect_cb(sid, environ):
     sio.emit('rank_list', [
-        216711, 118624, 385215, 377061, 285079,
-        286972, 387652, 401473, 396483, 299857,
-        400765, 240988, 406519, 354556, 307092,
-        410957, 209286, 334331, 229512, 385606]) # initial list
+        367277, 279612, 206899, 377061, 240277,
+        347454, 326436, 383562, 390107, 333844,
+        400765, 265198, 231704, 339998, 349362,
+        399788, 279437, 338695, 321100, 381494]) # initial list
 
     json_str = json.dumps({
         'time': time(),
