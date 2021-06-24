@@ -1,7 +1,6 @@
 # TFIDF
 
-## Get Started
-### Environment
+## Environment
 - Python==3.8
 - `pip install -r requirements.txt`
 - download CkipTagger models: 
