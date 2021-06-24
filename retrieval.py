@@ -2,7 +2,7 @@
 import numpy as np
 import pickle
 import csv
-from scipy.spatial import KDTree
+from sklearn.cluster import KMeans
 from time import time
 
 # input files
@@ -41,20 +41,6 @@ id2idx = {}
 for idx, id_ in enumerate(idx2id):
     id2idx[id_] = idx
 
-# %%
-
-# # build k-d tree
-# t = time()
-# print('building KDTree ...')
-# tree = KDTree(features)
-# print(f'building KDTree took {time()-t:.2f} seconds')
-
-# def retrieve_kdtree(vec, n_neighbor):
-#     distances, indices = tree.query(vec, k=n_neighbor)
-#     print('retrieve_kdtree:')
-#     print('    dist:', distances)
-#     return [idx2id[idx] for idx in indices]
-
 def retrieve_cosine(vec, n_ranklist):
     cosines = (features @ vec[:, np.newaxis]).ravel() / features_norm
     # cosine = cec @ features.T
@@ -73,6 +59,20 @@ def retrieve(feedback_ids, n_ranklist=10):
     # find nearest neighbors
     ids = retrieve_cosine(average_vec, n_ranklist)
     return ids
+
+# KMeans
+
+# t = time()
+# print('Clustering with KMeans ...')
+# kmeans = KMeans(n_clusters=20, random_state=0, max_iter=5).fit(features)
+# print(f'KMeans took {time()-t:.2f} seconds') # KMeans took 201.32 seconds
+# with open('kmeans.pkl', 'wb') as f:
+#     pickle.dump(kmeans, f)
+
+# with open('kmeans.pkl', 'rb') as f:
+#     kmeans = pickle.load(f)
+# for i in range(20):
+#     print(retrieve_cosine(kmeans.cluster_centers_[i], n_ranklist=1))
 
 if __name__ == '__main__':
     from code import InteractiveConsole

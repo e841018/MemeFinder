@@ -109,20 +109,13 @@ h1{
 }
 
 #spotlight{
-    width: 400px;
+    width: 600px;
     position: absolute;
-    top: calc(50% - 203px);
-    left: calc(50% - 203px);
+    top: calc(50% - 303px);
+    left: calc(50% - 303px);
     word-wrap: break-word;
     font-size: 24px;
     color: #ffffff;
     background: #000;
     border: 3px solid #fff;
-}
-
-.img-spotlight{
-    max-width: 400px;
-    max-height: 400px;
-    width: auto;
-    height: auto;
 }

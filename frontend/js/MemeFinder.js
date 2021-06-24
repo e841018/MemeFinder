@@ -80,6 +80,7 @@ function documentOnKeydown(event) {
             text_query.value = query.text_query;
             slider_weight.value = query.weight;
             slider_result.value = query.n_ranklist;
+            n_result.innerText = query.n_ranklist;
             rank_list.innerHTML = '';
             for (let id of query.rank_list)
                 rank_list.append(createImgBox(id));
@@ -109,11 +110,11 @@ function sliderResultOnInput(event) {
 }
 
 function fillSpotlight(id, text='') {
-    spotlight.append(text);
+    const br = document.createElement('br');
     const img = document.createElement('img');
     img.src = 'img_db/' + id + '.jpg';
     img.className = 'img-spotlight';
-    spotlight.append(img);
+    spotlight.append(text, br, img);
 }
 
 function spotlightBackgroundOnClick(event) {

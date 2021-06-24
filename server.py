@@ -39,7 +39,11 @@ app = socketio.WSGIApp(sio, app)
 
 @sio.on('connect')
 def connect_cb(sid, environ):
-    sio.emit('rank_list', [321100, 377618, 267348, 375601]) # initial list
+    sio.emit('rank_list', [
+        216711, 118624, 385215, 377061, 285079,
+        286972, 387652, 401473, 396483, 299857,
+        400765, 240988, 406519, 354556, 307092,
+        410957, 209286, 334331, 229512, 385606]) # initial list
 
     json_str = json.dumps({
         'time': time(),
