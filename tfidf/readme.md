@@ -6,12 +6,13 @@
 - download CkipTagger models: 
   - [iis-ckip](http://ckip.iis.sinica.edu.tw/data/ckiptagger/data.zip)
   - Downloads to ./data.zip (2GB) and extracts to ./data/
- 
+- `mkdir models`
+
 ## Main Usage
 - `tfidf.py`: load dataset and build tfidf model, also retrieve from the input query  
 
 ## How To Run
-- `python tfidf.py --text_file <text_file_path> --tfidf_path <tfidf_model_path> --index_path <index_model_path>`
+- `python tfidf.py --text_file <text_file_path> --tfidf_path <tfidf_model_path> --index_path <index_model_path> --tagger_path <tagger_model_path>`
 - example: `tfidf.sh`
 
 ## Functions Usage Example
