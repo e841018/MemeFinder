@@ -40,12 +40,13 @@ assert n_image == len(idx2id)
 id2idx = {}
 for idx, id_ in enumerate(idx2id):
     id2idx[id_] = idx
+idx2id = np.array(idx2id)
 
 def retrieve_cosine(vec, n_ranklist):
     cosines = (features @ vec[:, np.newaxis]).ravel() / features_norm
     # cosine = cec @ features.T
-    indices = np.argsort(cosines)[-n_ranklist:][::-1]
-    return [idx2id[idx] for idx in indices]
+    indices = np.argsort(-cosines)[:n_ranklist]
+    return idx2id[indices].tolist()
 
 def retrieve(feedback_ids, n_ranklist=10):
     # average
@@ -59,6 +60,21 @@ def retrieve(feedback_ids, n_ranklist=10):
     # find nearest neighbors
     ids = retrieve_cosine(average_vec, n_ranklist)
     return ids
+
+def score(feedback_ids):
+    # average
+    average_vec = np.zeros(n_feature)
+    for id_ in feedback_ids:
+        idx = id2idx[id_]
+        average_vec += features[idx]
+    if len(feedback_ids) > 0:
+        average_vec /= len(feedback_ids)
+
+    # cosine
+    average_vec /= np.linalg.norm(average_vec)
+    cosines = (features @ average_vec[:, np.newaxis]).ravel() / features_norm
+
+    return cosines
 
 # KMeans
 

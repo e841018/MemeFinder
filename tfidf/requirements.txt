@@ -1,3 +1,5 @@
 ckiptagger==0.2.1
 gensim==4.0.1
 numpy==1.20.1
+tensorflow
+python-Levenshtein

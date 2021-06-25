@@ -13,21 +13,33 @@ from gensim.similarities import SoftCosineSimilarity, SparseTermSimilarityMatrix
 from collections import OrderedDict
 
 parser = argparse.ArgumentParser(description='TFIDF')
-parser.add_argument('--text_file', required=True, type=str, help='path of image ocr results')
-parser.add_argument('--tfidf_path', required=True, type=str, help='path to save tfidf model')
-parser.add_argument('--index_path', required=True, type=str, help='path to save index model')
+parser.add_argument('--text_file', type=str, help='path of image ocr results', default='ocr_texts/text.csv')
+parser.add_argument('--tfidf_path', type=str, help='path to save tfidf model', default='models/tfidf.mm')
+parser.add_argument('--index_path', type=str, help='path to save index model', default='models/index.mm')
+parser.add_argument('--tagger_path', type=str, help='path to load CkipTagger model', default='data')
 
-args = parser.parse_args() 
+if __name__ == '__main__':
+    args = parser.parse_args()
+else:
+    args = parser.parse_args([
+        '--text_file', 'tfidf/ocr_texts/text.csv',
+        '--tfidf_path', 'tfidf/models/tfidf.mm',
+        '--index_path', 'tfidf/models/index.mm',
+        '--tagger_path', 'tfidf/data',
+        ])
 
 class TFIDF():
     def __init__(self, all_text):
         self.doclen = len(all_text)
-        self.imageId = list(all_text.keys())
+        self.imageId = np.array(list(all_text.keys()))
         self.all_text = list(all_text.values())
         self.dictionary = corpora.Dictionary(self.all_text)
         self.corpus = [self.dictionary.doc2bow(text) for text in self.all_text]
         self.featureNum = len(self.dictionary.token2id.keys())
-        self.ws = WS('./data', disable_cuda=False)
+        self.ws = WS(args.tagger_path, disable_cuda=False)
+
+        # array for permuting scores
+        self.permute = np.argsort(self.imageId)
 
     def build_models(self, tfidf_path=None, index_path=None):
         if tfidf_path and os.path.exists(tfidf_path):
@@ -68,22 +80,27 @@ class TFIDF():
     
     def get_result(self, idx):
         return self.imageId[idx], self.all_text[idx]
+
+    def score(self, query):
+        qtf = self.get_tfidf(query)
+        qindices = self.index[qtf]
+        return qindices[self.permute]
             
+all_text = dict()
+with open(args.text_file, 'r', encoding='utf-8') as f:
+    lines = f.readlines()
+
+for line in lines:
+    parts = line.split(',')
+    imageID = int(parts[0])
+    texts = parts[1].replace('\n', '').split(" ")
+    all_text[imageID] = texts
+
+tfidf = TFIDF(all_text)
+tfidf.build_models(args.tfidf_path, args.index_path)
+print("[*] there are total {} terms in the {} documents".format(tfidf.featureNum, tfidf.doclen))
+
 if __name__ == '__main__':
-    all_text = dict()
-    with open(args.text_file, 'r') as f:
-        lines = f.readlines()
-
-    for line in lines:
-        parts = line.split(',')
-        imageID = parts[0]
-        texts = parts[1].replace('\n', '').split(" ")
-        all_text[imageID] = texts
-
-    tfidf = TFIDF(all_text)
-    tfidf.build_models(args.tfidf_path, args.index_path)
-    print("[*] there are total {} terms in the {} documents".format(tfidf.featureNum, tfidf.doclen))
-    
     try:
         k = int(input("number of retrieved documents(default 10): "))
     except:

@@ -1,10 +1,20 @@
 import json
 from time import time
+import numpy as np
 from flask import Flask, send_from_directory
 import socketio
 import eventlet, eventlet.wsgi
 
-from Eric.retrieval import retrieve
+from ImgVector.retrieval import score as score_img
+from ImgVector.retrieval import idx2id
+from tfidf.tfidf import tfidf
+score_ocr = tfidf.score
+
+homepage_ids = [
+    367277, 279612, 206899, 377061, 240277,
+    347454, 326436, 383562, 390107, 333844,
+    400765, 265198, 231704, 339998, 349362,
+    399788, 279437, 338695, 321100, 381494]
 
 #===============================================================================
 # http server
@@ -12,8 +22,13 @@ from Eric.retrieval import retrieve
 app = Flask(__name__)
 
 @app.route('/')
+@app.route('/index.html')
 def index():
     return send_from_directory('frontend', 'index.html')
+
+@app.route('/eval')
+def index_eval():
+    return send_from_directory('frontend', 'eval.html')
 
 @app.route('/css/<string:path>')
 def send_css(path):
@@ -39,11 +54,7 @@ app = socketio.WSGIApp(sio, app)
 
 @sio.on('connect')
 def connect_cb(sid, environ):
-    sio.emit('rank_list', [
-        216711, 118624, 385215, 377061, 285079,
-        286972, 387652, 401473, 396483, 299857,
-        400765, 240988, 406519, 354556, 307092,
-        410957, 209286, 334331, 229512, 385606]) # initial list
+    sio.emit('rank_list', homepage_ids)
 
     json_str = json.dumps({
         'time': time(),
@@ -68,9 +79,20 @@ def query_cb(sid, query):
     n_ranklist = query['n_ranklist']
     weight = query['weight']
 
-    response = retrieve(img_query, n_ranklist)
-    sio.emit('rank_list', response)
+    # scores
+    scores_ocr = score_ocr(text_query) if len(text_query.strip()) else 0. # value in [0, 1] ?
+    scores_img = score_img(img_query) if len(img_query) else 0. # value in [0, 1]
 
+    scores = weight * scores_ocr \
+           + (1 - weight) * scores_img
+
+    # response
+    if type(scores) == float and scores == 0.:
+        response = homepage_ids
+    else:
+        indices = np.argsort(-scores)[:n_ranklist]
+        response = idx2id[indices].tolist()
+    sio.emit('rank_list', response)
     json_str = json.dumps({
         'time': time(),
         'sid': sid,
@@ -84,7 +106,7 @@ def query_cb(sid, query):
 # start server
 
 log_file_name = 'server_log.txt'
-address = '127.0.0.1'
+address = '0.0.0.0'
 port = 8080
 green_socket = eventlet.listen((address, port))
 print(f'Server is online at {address}:{port}')

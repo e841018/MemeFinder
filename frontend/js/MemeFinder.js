@@ -14,7 +14,13 @@ let spotlight;
 
 // objects
 let socket; // socket.io
-let query_log = [];
+let dirty = false; // true indicates some inputs has changed since last query
+let query_log = [{ // log of all sent queries, shrinks as undo() is called
+    'img_query': [],
+    'text_query': '',
+    'weight': 0.5,
+    'n_ranklist': 10,
+}];
 
 //==============================================================================
 // functions
@@ -51,6 +57,7 @@ function imgBoxOnClick(event) {
             return;
     const div = createImgBox_cross(new_id)
     fb_list.insertBefore(div, fb_list.firstChild);
+    dirty = true;
 }
 
 function imgBoxOnContextMenu(event) {
@@ -65,6 +72,27 @@ function crossOnClick(event) {
     this.parentElement.remove();
 }
 
+function undo() {
+    if (dirty === false) {
+        if (query_log.length == 1) // state is same as initial state
+            return;
+        else // state is same as last entry in query_log
+            query_log.pop();
+    }
+    const query = query_log[query_log.length - 1];
+    fb_list.innerHTML = '';
+    for (let id of query.img_query)
+        fb_list.append(createImgBox_cross(id));
+    text_query.value = query.text_query;
+    slider_weight.value = query.weight;
+    slider_result.value = query.n_ranklist;
+    n_result.innerText = query.n_ranklist;
+    rank_list.innerHTML = '';
+    for (let id of query.rank_list)
+        rank_list.append(createImgBox(id));
+    dirty = false;
+}
+
 function documentOnKeydown(event) {
     // console.log('event.KeyCode =', event.keyCode);
     if (event.keyCode == 13) { // enter
@@ -72,19 +100,7 @@ function documentOnKeydown(event) {
     }
     if (event.keyCode == 90 && event.ctrlKey) { // Ctrl+Z
         event.preventDefault(); // prevent from focusing on last changed input
-        if (query_log.length > 0) {
-            const query = query_log.pop();
-            fb_list.innerHTML = '';
-            for (let id of query.img_query)
-                fb_list.append(createImgBox_cross(id));
-            text_query.value = query.text_query;
-            slider_weight.value = query.weight;
-            slider_result.value = query.n_ranklist;
-            n_result.innerText = query.n_ranklist;
-            rank_list.innerHTML = '';
-            for (let id of query.rank_list)
-                rank_list.append(createImgBox(id));
-        }
+        undo();
     }
 }
 
@@ -99,6 +115,8 @@ function sendQuery() {
         'weight': Number(slider_weight.value),
         'n_ranklist': Number(slider_result.value),
     }
+    if (typeof EVAL != 'undefined')
+        parent.evalAnnotateQuery(query);
     query_log.push(query);
     socket.emit('query', query);
     console.log('send query:', query);
@@ -107,6 +125,7 @@ function sendQuery() {
 function sliderResultOnInput(event) {
     event.stopPropagation();
     n_result.innerText = this.value;
+    dirty = true;
 }
 
 function fillSpotlight(id, text='') {
@@ -123,7 +142,7 @@ function spotlightBackgroundOnClick(event) {
     spotlight.innerHTML = '';
 }
 
-window.onload = function() {
+window.onload = function(event) {
     // elements
     fb_list = document.getElementById('fb-list');
     rank_list = document.getElementById('rank-list');
@@ -136,9 +155,13 @@ window.onload = function() {
 
     // callbacks
     slider_result.oninput = sliderResultOnInput;
+    slider_weight.oninput = e => dirty = true;
+    text_query.oninput = e => dirty = true;
     document.onkeydown = documentOnKeydown;
+    document.getElementById('enter').onclick = sendQuery;
+    document.getElementById('undo').onclick = undo;
     spotlight_background.onclick = spotlightBackgroundOnClick;
-    spotlight.onclick = event => event.stopPropagation();
+    spotlight.onclick = e => e.stopPropagation();
 
     // socket
     socket = io();
@@ -153,8 +176,8 @@ window.onload = function() {
         rank_list.innerHTML = '';
         for (let id of data)
             rank_list.append(createImgBox(id));
-        if (query_log.length > 0)
-            query_log[query_log.length - 1].rank_list = data;
+        query_log[query_log.length - 1].rank_list = data;
+        dirty = false;
     });
 };
 
