@@ -1,0 +1,43 @@
+body{
+    margin: 0px;
+    height: 100vh;
+    display: flex; /* flex container */
+    flex-flow: column;
+    font-family: Helvetica;
+    user-select: none;
+    image-rendering: pixelated;
+}
+
+header{
+    padding: 10px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    color: #fff;
+    background: #000;
+}
+
+#embed-doc{
+    flex-grow: 1; /* fill (vertical) blank */
+}
+
+.controls{
+    height: 30px;
+    font-size: 20px;
+}
+
+.controls-inner{
+    display: inline;
+}
+
+.big-title{
+    font-size: 32px;
+}
+
+#skip{
+    font-size: 24px;
+}
+
+div{
+    user-select: text;
+}
