@@ -5,8 +5,9 @@ from flask import Flask, send_from_directory
 import socketio
 import eventlet, eventlet.wsgi
 
-from ImgVector.retrieval import score as score_img
+from quiz import sample_quiz
 from ImgVector.retrieval import idx2id
+from ImgVector.retrieval import score as score_img
 from tfidf.tfidf import tfidf
 score_ocr = tfidf.score
 
@@ -109,11 +110,7 @@ def query_cb(sid, query):
 
 @sio.on('start_quiz')
 def start_eval_cb(sid):
-    quiz = [
-        [367277, 1], [279612, 2], [206899, 3], [377061, 4], [240277, 1],
-        [347454, 2], [326436, 3], [383562, 4], [390107, 1], [333844, 2],
-        [400765, 3], [265198, 4], [231704, 1], [339998, 2], [349362, 3],
-        [399788, 4], [279437, 1], [338695, 2], [321100, 3], [381494, 4]]
+    quiz = sample_quiz(20)
     sio.emit('quiz', quiz)
     json_str = json.dumps({
         'time': time(),

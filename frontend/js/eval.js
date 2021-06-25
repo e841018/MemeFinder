@@ -98,6 +98,7 @@ function maskQuadrant(img, quadrant) {
     const div = par.insertBefore(document.createElement('div'), img);
     div.style.position = 'relative';
     div.append(img);
+    img.style.visibility = 'hidden';
     // create canvas
     const canvas = document.createElement('canvas');
     canvas.style.position = 'absolute';
@@ -127,6 +128,7 @@ function maskQuadrant(img, quadrant) {
         }
         const context = canvas.getContext('2d');
         context.fillRect(left, top, w/2, h/2);
+        img.style.visibility = 'visible';
     });
 }
 
