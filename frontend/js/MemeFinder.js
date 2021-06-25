@@ -13,14 +13,19 @@ let spotlight_background;
 let spotlight;
 
 // objects
-let socket; // socket.io
-let dirty = false; // true indicates some inputs has changed since last query
-let query_log = [{ // log of all sent queries, shrinks as undo() is called
+// use var instead of let to allow access from parent
+var socket; // socket.io
+var dirty = false; // true indicates some inputs has changed since last query
+var query_log = [{ // log of all sent queries, shrinks as undo() is called
     'img_query': [],
     'text_query': '',
     'weight': 0.5,
     'n_ranklist': 10,
 }];
+var onQuery; // called when query is sent
+var spotlightOnClose;
+var spotlightOnOpen;
+var lock_spotlight = false; // prevent user from closing spotlight
 
 //==============================================================================
 // functions
@@ -64,6 +69,8 @@ function imgBoxOnContextMenu(event) {
     event.stopPropagation();
     event.preventDefault();
     fillSpotlight(this.id, 'Image ID: ' + this.id);
+    if (typeof spotlightOnOpen != 'undefined')
+        spotlightOnOpen();
     spotlight_background.style.display= 'block';
 }
 
@@ -115,8 +122,8 @@ function sendQuery() {
         'weight': Number(slider_weight.value),
         'n_ranklist': Number(slider_result.value),
     }
-    if (typeof EVAL != 'undefined')
-        parent.evalAnnotateQuery(query);
+    if (typeof onQuery != 'undefined')
+    onQuery(query);
     query_log.push(query);
     socket.emit('query', query);
     console.log('send query:', query);
@@ -132,14 +139,17 @@ function fillSpotlight(id, text='') {
     const br = document.createElement('br');
     const img = document.createElement('img');
     img.src = 'img_db/' + id + '.jpg';
-    img.className = 'img-spotlight';
     spotlight.append(text, br, img);
 }
 
 function spotlightBackgroundOnClick(event) {
     event.stopPropagation();
+    if (lock_spotlight)
+        return;
     spotlight_background.style.display = 'none';
     spotlight.innerHTML = '';
+    if (typeof spotlightOnClose != 'undefined')
+        spotlightOnClose();
 }
 
 window.onload = function(event) {
@@ -180,8 +190,3 @@ window.onload = function(event) {
         dirty = false;
     });
 };
-
-/*
-TODOs:
- * right click to enlarge image
-*/

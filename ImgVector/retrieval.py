@@ -2,8 +2,6 @@
 import numpy as np
 import pickle
 import csv
-from sklearn.cluster import KMeans
-from time import time
 
 # input files
 feature_file = 'features/memes_tw.pkl'
@@ -44,7 +42,6 @@ idx2id = np.array(idx2id)
 
 def retrieve_cosine(vec, n_ranklist):
     cosines = (features @ vec[:, np.newaxis]).ravel() / features_norm
-    # cosine = cec @ features.T
     indices = np.argsort(-cosines)[:n_ranklist]
     return idx2id[indices].tolist()
 
@@ -77,6 +74,9 @@ def score(feedback_ids):
     return cosines
 
 # KMeans
+
+# from sklearn.cluster import KMeans
+# from time import time
 
 # t = time()
 # print('Clustering with KMeans ...')
