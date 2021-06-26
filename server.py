@@ -9,7 +9,7 @@ from quiz import sample_quiz
 from ImgVector.retrieval import idx2id
 from ImgVector.retrieval import score as score_img
 from tfidf.tfidf import tfidf
-score_ocr = tfidf.score
+score_text = tfidf.score
 
 homepage_ids = [
     367277, 279612, 206899, 377061, 240277,
@@ -82,14 +82,14 @@ def query_cb(sid, query):
     disable_pseudo_label = 'set' in query and query['set'] == 1 # UI: Set 2
 
     # scores
-    if disable_pseudo_label:
-        scores = 0.
-        # TODO: calculate scores
-    else:
-        scores_ocr = score_ocr(text_query) if len(text_query.strip()) else 0. # value in [0, 1] ?
-        scores_img = score_img(img_query) if len(img_query) else 0. # value in [0, 1]
+    scores_ocr, scores_tag, scores_all = score_text(text_query) # value in [0, 1] ?
+    scores_img = score_img(img_query) if len(img_query) else 0. # value in [0, 1]
 
+    if disable_pseudo_label:
         scores = weight * scores_ocr \
+            + (1 - weight) * scores_img
+    else:
+        scores = weight * scores_all \
             + (1 - weight) * scores_img
 
     # response
