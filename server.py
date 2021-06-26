@@ -56,6 +56,7 @@ app = socketio.WSGIApp(sio, app)
 @sio.on('connect')
 def connect_cb(sid, environ):
     sio.emit('rank_list', homepage_ids, room=sid)
+    sio.emit('sid', sid, room=sid)
 
     json_str = json.dumps({
         'time': time(),
@@ -118,7 +119,7 @@ def start_eval_cb(sid):
         'event': 'start_quiz',
         'quiz': quiz}, ensure_ascii=False)
     log_file.write(json_str + '\n')
-    print(f'{sid}: quiz={quiz}')
+    print(f'{sid}: quiz=[{quiz[0]}, {quiz[1]}, ...]')
 
 @sio.on('submit')
 def submit_cb(sid, data):
@@ -130,15 +131,15 @@ def submit_cb(sid, data):
     log_file.write(json_str + '\n')
     print(f'{sid}: submit question {data[0]}: id={data[1]}')
 
-@sio.on('finish')
-def finish_cb(sid, data):
-    json_str = json.dumps({
-        'time': time(),
-        'sid': sid,
-        'event': 'finish',
-        'contact': data}, ensure_ascii=False)
-    log_file.write(json_str + '\n')
-    print(f'{sid}: finished. contact: {data}')
+# @sio.on('finish')
+# def finish_cb(sid, data):
+#     json_str = json.dumps({
+#         'time': time(),
+#         'sid': sid,
+#         'event': 'finish',
+#         'contact': data}, ensure_ascii=False)
+#     log_file.write(json_str + '\n')
+#     print(f'{sid}: finished. contact: {data}')
 
 #===============================================================================
 # start server

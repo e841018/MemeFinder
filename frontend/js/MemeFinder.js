@@ -15,6 +15,7 @@ let spotlight;
 // objects
 // use var instead of let to allow access from parent
 var socket; // socket.io
+var sid; // session id
 var dirty = false; // true indicates some inputs has changed since last query
 var query_log = [{ // log of all sent queries, shrinks as undo() is called
     'img_query': [],
@@ -188,5 +189,8 @@ window.onload = function(event) {
             rank_list.append(createImgBox(id));
         query_log[query_log.length - 1].rank_list = data;
         dirty = false;
+    });
+    socket.on('sid', function(data) {
+        sid = data;
     });
 };
