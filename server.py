@@ -1,12 +1,26 @@
 import json
 from time import time
 import numpy as np
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, send_file
 import socketio
 import eventlet, eventlet.wsgi
 
-import resource
-resource.setrlimit(resource.RLIMIT_NOFILE, (65536, 65536))
+import sys
+if sys.platform != 'win32':
+    import resource
+    resource.setrlimit(resource.RLIMIT_NOFILE, (65536, 65536))
+
+# preallocate resources
+import os, io
+from tqdm import tqdm
+img_dict = {}
+img_dir = 'images/memes_tw/class0'
+for path in tqdm(os.listdir(img_dir)):
+    mem = io.BytesIO()
+    with open(os.path.join(img_dir, path), 'rb') as f:
+        mem.write(f.read())
+        mem.close = lambda *args: None
+        img_dict[path] = mem
 
 from quiz import sample_quiz
 from ImgVector.retrieval import idx2id
@@ -20,7 +34,7 @@ homepage_ids = [
     400765, 265198, 231704, 339998, 349362,
     399788, 279437, 338695, 321100, 381494]
 
-max_user = 3
+max_user = 100
 sid_pool = set() # allowed access
 
 #===============================================================================
@@ -51,7 +65,10 @@ def send_img(path):
 
 @app.route('/img_db/<string:path>')
 def send_img_db(path):
-    return send_from_directory('images/memes_tw/class0', path)
+    print(path)
+    # return send_from_directory('images/memes_tw/class0', path)
+    img_dict[path].seek(0)
+    return send_file(img_dict[path], mimetype='image/jpeg')
 
 #===============================================================================
 # socket
