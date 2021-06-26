@@ -55,7 +55,7 @@ app = socketio.WSGIApp(sio, app)
 
 @sio.on('connect')
 def connect_cb(sid, environ):
-    sio.emit('rank_list', homepage_ids)
+    sio.emit('rank_list', homepage_ids, room=sid)
 
     json_str = json.dumps({
         'time': time(),
@@ -98,7 +98,7 @@ def query_cb(sid, query):
     else:
         indices = np.argsort(-scores)[:n_ranklist]
         response = idx2id[indices].tolist()
-    sio.emit('rank_list', response)
+    sio.emit('rank_list', response, room=sid)
     json_str = json.dumps({
         'time': time(),
         'sid': sid,
@@ -111,7 +111,7 @@ def query_cb(sid, query):
 @sio.on('start_quiz')
 def start_eval_cb(sid):
     quiz = sample_quiz(20)
-    sio.emit('quiz', quiz)
+    sio.emit('quiz', quiz, room=sid)
     json_str = json.dumps({
         'time': time(),
         'sid': sid,
