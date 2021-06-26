@@ -19,6 +19,7 @@ parser.add_argument('--tag_file', type=str, help='path of image tags', default='
 parser.add_argument('--tfidf_path', type=str, help='path to save tfidf model', default='models/tfidf.mm')
 parser.add_argument('--index_path', type=str, help='path to save index model', default='models/index.mm')
 parser.add_argument('--tagger_path', type=str, help='path to load CkipTagger model', default='data')
+parser.add_argument('--mode', type=str, help='0: ocr texts, 1: tag, 2: merge', default='2')
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -92,24 +93,29 @@ class TFIDF():
         return qindices[self.permute]
             
 all_text = dict()
-with open(args.text_file, 'r', encoding='utf-8') as f:
-    lines = f.readlines()
 
-for line in lines:
-    parts = line.split(',')
-    imageID = int(parts[0])
-    texts = parts[1].replace('\n', '').split(" ")
-    all_text[imageID] = texts
+if args.mode == '0' or args.mode == '2':
+    with open(args.text_file, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
 
-with open(args.tag_file, 'r', encoding='utf-8') as f:
-    lines = f.readlines()
+    for line in lines:
+        parts = line.split(',')
+        imageID = int(parts[0])
+        texts = parts[1].replace('\n', '').split(" ")
+        all_text[imageID] = texts
+if args.mode == '1' or args.mode == '2':
+    with open(args.tag_file, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
 
-lines = lines[1:]
-for line in lines:
-    parts = line.split(',')
-    imageID = int(parts[0])
-    texts = parts[1].replace('\n', '').split(" ")
-    all_text[imageID] += texts
+    lines = lines[1:]
+    for line in lines:
+        parts = line.split(',')
+        imageID = int(parts[0])
+        texts = parts[1].replace('\n', '').split(" ")
+        if imageID in all_text.keys():
+            all_text[imageID] += texts
+        else:
+            all_text[imageID] = texts
 
 tfidf = TFIDF(all_text)
 tfidf.build_models(args.tfidf_path, args.index_path)
