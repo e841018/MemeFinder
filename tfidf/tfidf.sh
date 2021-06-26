@@ -1,6 +1,5 @@
-python tfidf.py --text_file ocr_texts/text.csv \
-                --tag_file tags/tag_parse.csv \
-                --tfidf_path models/tfidf_tag.mm \
-                --index_path models/index_tag.mm \
-                --tagger_path data \
-                --mode 1
+python tfidf.py --ocr_file documents/ocrs.csv \
+                --tag_file documents/tags.csv \
+                --text_file documents/alls.csv \
+                --model_path models \
+                --tagger_path data 
