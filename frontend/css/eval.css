@@ -4,8 +4,6 @@ body{
     display: flex; /* flex container */
     flex-flow: column;
     font-family: Helvetica;
-    user-select: none;
-    image-rendering: pixelated;
 }
 
 header{
@@ -36,8 +34,4 @@ header{
 
 #skip{
     font-size: 24px;
-}
-
-div{
-    user-select: text;
 }

@@ -5,8 +5,9 @@ from flask import Flask, send_from_directory
 import socketio
 import eventlet, eventlet.wsgi
 
-from ImgVector.retrieval import score as score_img
+from quiz import sample_quiz
 from ImgVector.retrieval import idx2id
+from ImgVector.retrieval import score as score_img
 from tfidf.tfidf import tfidf
 score_ocr = tfidf.score
 
@@ -78,13 +79,18 @@ def query_cb(sid, query):
     text_query = query['text_query']
     n_ranklist = query['n_ranklist']
     weight = query['weight']
+    disable_pseudo_label = 'set' in query and query['set'] == 1 # UI: Set 2
 
     # scores
-    scores_ocr = score_ocr(text_query) if len(text_query.strip()) else 0. # value in [0, 1] ?
-    scores_img = score_img(img_query) if len(img_query) else 0. # value in [0, 1]
+    if disable_pseudo_label:
+        scores = 0.
+        # TODO: calculate scores
+    else:
+        scores_ocr = score_ocr(text_query) if len(text_query.strip()) else 0. # value in [0, 1] ?
+        scores_img = score_img(img_query) if len(img_query) else 0. # value in [0, 1]
 
-    scores = weight * scores_ocr \
-           + (1 - weight) * scores_img
+        scores = weight * scores_ocr \
+            + (1 - weight) * scores_img
 
     # response
     if type(scores) == float and scores == 0.:
@@ -101,6 +107,39 @@ def query_cb(sid, query):
         'response': response}, ensure_ascii=False)
     log_file.write(json_str + '\n')
     print(f'{sid}: query={query}')
+
+@sio.on('start_quiz')
+def start_eval_cb(sid):
+    quiz = sample_quiz(20)
+    sio.emit('quiz', quiz)
+    json_str = json.dumps({
+        'time': time(),
+        'sid': sid,
+        'event': 'start_quiz',
+        'quiz': quiz}, ensure_ascii=False)
+    log_file.write(json_str + '\n')
+    print(f'{sid}: quiz={quiz}')
+
+@sio.on('submit')
+def submit_cb(sid, data):
+    json_str = json.dumps({
+        'time': time(),
+        'sid': sid,
+        'event': 'submit',
+        'submission': data}, ensure_ascii=False)
+    log_file.write(json_str + '\n')
+    print(f'{sid}: submit question {data[0]}: id={data[1]}')
+
+
+@sio.on('finish')
+def finish_cb(sid, data):
+    json_str = json.dumps({
+        'time': time(),
+        'sid': sid,
+        'event': 'finish',
+        'contact': data}, ensure_ascii=False)
+    log_file.write(json_str + '\n')
+    print(f'{sid}: finished. contact: {data}')
 
 #===============================================================================
 # start server
