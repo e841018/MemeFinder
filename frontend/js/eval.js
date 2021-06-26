@@ -58,7 +58,7 @@ function nextQuestion() {
     // update quiz_idx
     quiz_idx += 1;
     if (quiz_idx == set_len * 2) {
-        finishQuiz();
+        finishQuiz_new();
         return;
     }
     // update UI
@@ -168,6 +168,35 @@ function finishQuiz() {
         clearSpotlight();
     }
     spotlight.append(contact, button);
+    showSpotlight();
+}
+
+function finishQuiz_new() {
+    // cancel registered callbacks
+    embed_global.onQuery = () => {};
+    embed_global.spotlightOnOpen = () => {};
+    skip.onclick = () => {};
+    // disable closing spotlight until form is filled
+    embed_global.lock_spotlight = true;
+
+    // modify elements
+    status.innerHTML = '通關密碼：' + embed_global.sid;
+    skip.previousElementSibling.remove();
+    skip.remove();
+    spotlight.innerHTML = '感謝你，測驗結束囉！<br>';
+    const button = document.createElement('input');
+    button.type = 'button';
+    button.value = '填寫問卷取得抽獎資格 (約 2 分鐘)';
+    button.style.fontSize = '24px';
+    button.style.margin = '5px';
+    button.onclick = (event) => {
+        const a = embed_document.createElement('a');
+        a.href = 'https://forms.gle/dFuWdp92ZRuBe4wy5';
+        a.target = '_self';
+        a.rel = 'noopener';
+        a.click();
+    }
+    spotlight.append(button);
     showSpotlight();
 }
 
