@@ -5,6 +5,9 @@ from flask import Flask, send_from_directory
 import socketio
 import eventlet, eventlet.wsgi
 
+import resource
+resource.setrlimit(resource.RLIMIT_NOFILE, (65536, 65536))
+
 from quiz import sample_quiz
 from ImgVector.retrieval import idx2id
 from ImgVector.retrieval import score as score_img
