@@ -193,4 +193,8 @@ window.onload = function(event) {
     socket.on('sid', function(data) {
         sid = data;
     });
+    socket.on('overload', function(){
+        alert('現在連線人數過多...請稍後再試');
+        socket.disconnect()
+    });
 };

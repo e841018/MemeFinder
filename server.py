@@ -17,6 +17,9 @@ homepage_ids = [
     400765, 265198, 231704, 339998, 349362,
     399788, 279437, 338695, 321100, 381494]
 
+max_user = 3
+sid_pool = set() # allowed access
+
 #===============================================================================
 # http server
 
@@ -55,6 +58,12 @@ app = socketio.WSGIApp(sio, app)
 
 @sio.on('connect')
 def connect_cb(sid, environ):
+    if len(sid_pool) >= max_user:
+        sio.emit('overload', room=sid)
+        print(f'{sid}: too much users, forbidden')
+        return
+    sid_pool.add(sid)
+
     sio.emit('rank_list', homepage_ids, room=sid)
     sio.emit('sid', sid, room=sid)
 
@@ -63,10 +72,13 @@ def connect_cb(sid, environ):
         'sid': sid,
         'event': 'connect'}, ensure_ascii=False)
     log_file.write(json_str + '\n')
-    print(f'{sid}: connect')
+    print(f'{sid}: connect, {len(sid_pool)} active connections')
 
 @sio.on('disconnect')
 def disconnect_cb(sid):
+    if sid in sid_pool:
+        sid_pool.remove(sid)
+
     json_str = json.dumps({
         'time': time(),
         'sid': sid,
@@ -76,6 +88,9 @@ def disconnect_cb(sid):
 
 @sio.on('query')
 def query_cb(sid, query):
+    if sid not in sid_pool:
+        return
+
     img_query = query['img_query']
     text_query = query['text_query']
     n_ranklist = query['n_ranklist']
@@ -111,6 +126,9 @@ def query_cb(sid, query):
 
 @sio.on('start_quiz')
 def start_eval_cb(sid):
+    if sid not in sid_pool:
+        return
+
     quiz = sample_quiz(20)
     sio.emit('quiz', quiz, room=sid)
     json_str = json.dumps({
