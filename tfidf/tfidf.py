@@ -36,10 +36,10 @@ ws = WS(args.tagger_path, disable_cuda=False)
 class TFIDF():
     def __init__(self, all_text_ocr, all_text_tag, all_text):
         self.doclen = len(all_text)
-        self.imageId = np.array(list(all_text.keys()))
-        self.ocrs = list(sorted(all_text_ocr.values()))
-        self.tags = list(sorted(all_text_tag.values()))
-        self.alls = list(sorted(all_text.values()))
+        self.imageId = list(all_text.keys())
+        self.ocrs = list(all_text_ocr.values())
+        self.tags = list(all_text_tag.values())
+        self.alls = list(all_text.values())
         self.dictionary_ocr = corpora.Dictionary(self.ocrs)
         self.dictionary_tag = corpora.Dictionary(self.tags)
         self.dictionary_all = corpora.Dictionary(self.alls)
@@ -50,9 +50,6 @@ class TFIDF():
         self.featureNum_tag = len(self.dictionary_tag.token2id.keys())
         self.featureNum_all = len(self.dictionary_all.token2id.keys())
         self.ws = WS(args.tagger_path, disable_cuda=False)
-
-        # array for permuting scores
-        self.permute = np.argsort(self.imageId)
 
     def build_models(self, model_path=None):
         if os.path.exists(model_path+'/tfidf_all.mm'):
@@ -141,7 +138,7 @@ class TFIDF():
         qindices_ocr = self.index_ocr[qtf_ocr]
         qindices_tag = self.index_tag[qtf_tag]
         qindices_all = self.index_all[qtf_all]
-        return qindices_ocr[self.permute], qindices_tag[self.permute], qindices_all[self.permute]
+        return qindices_ocr, qindices_tag, qindices_all
             
 all_text_ocr = dict()
 all_text_tag = dict()
