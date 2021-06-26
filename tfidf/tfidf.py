@@ -4,6 +4,7 @@ from collections import OrderedDict
 import json
 import argparse
 from ckiptagger import WS
+from tqdm import tqdm
 
 import gensim
 from gensim import corpora, models, similarities
@@ -14,6 +15,7 @@ from collections import OrderedDict
 
 parser = argparse.ArgumentParser(description='TFIDF')
 parser.add_argument('--text_file', type=str, help='path of image ocr results', default='ocr_texts/text.csv')
+parser.add_argument('--tag_file', type=str, help='path of image tags', default='tags/tag_parse.csv')
 parser.add_argument('--tfidf_path', type=str, help='path to save tfidf model', default='models/tfidf.mm')
 parser.add_argument('--index_path', type=str, help='path to save index model', default='models/index.mm')
 parser.add_argument('--tagger_path', type=str, help='path to load CkipTagger model', default='data')
@@ -23,10 +25,13 @@ if __name__ == '__main__':
 else:
     args = parser.parse_args([
         '--text_file', 'tfidf/ocr_texts/text.csv',
+        '--tag_file', 'tfidf/tags/tag_parse.csv',
         '--tfidf_path', 'tfidf/models/tfidf.mm',
         '--index_path', 'tfidf/models/index.mm',
         '--tagger_path', 'tfidf/data',
         ])
+
+ws = WS(args.tagger_path, disable_cuda=False)
 
 class TFIDF():
     def __init__(self, all_text):
@@ -96,8 +101,19 @@ for line in lines:
     texts = parts[1].replace('\n', '').split(" ")
     all_text[imageID] = texts
 
+with open(args.tag_file, 'r', encoding='utf-8') as f:
+    lines = f.readlines()
+
+lines = lines[1:]
+for line in lines:
+    parts = line.split(',')
+    imageID = int(parts[0])
+    texts = parts[1].replace('\n', '').split(" ")
+    all_text[imageID] += texts
+
 tfidf = TFIDF(all_text)
 tfidf.build_models(args.tfidf_path, args.index_path)
+
 print("[*] there are total {} terms in the {} documents".format(tfidf.featureNum, tfidf.doclen))
 
 if __name__ == '__main__':
