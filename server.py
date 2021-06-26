@@ -93,8 +93,8 @@ def query_cb(sid, query):
             + (1 - weight) * scores_img
 
     # response
-    if type(scores) == float and scores == 0.:
-        response = homepage_ids
+    if np.all(scores == 0):
+        response = []
     else:
         indices = np.argsort(-scores)[:n_ranklist]
         response = idx2id[indices].tolist()
@@ -129,7 +129,6 @@ def submit_cb(sid, data):
         'submission': data}, ensure_ascii=False)
     log_file.write(json_str + '\n')
     print(f'{sid}: submit question {data[0]}: id={data[1]}')
-
 
 @sio.on('finish')
 def finish_cb(sid, data):
