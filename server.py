@@ -16,11 +16,8 @@ from tqdm import tqdm
 img_dict = {}
 img_dir = 'images/memes_tw/class0'
 for path in tqdm(os.listdir(img_dir)):
-    mem = io.BytesIO()
     with open(os.path.join(img_dir, path), 'rb') as f:
-        mem.write(f.read())
-        mem.close = lambda *args: None
-        img_dict[path] = mem
+        img_dict[path] = f.read()
 
 from quiz import sample_quiz
 from ImgVector.retrieval import idx2id
@@ -34,7 +31,7 @@ homepage_ids = [
     400765, 265198, 231704, 339998, 349362,
     399788, 279437, 338695, 321100, 381494]
 
-max_user = 100
+max_user = 10
 sid_pool = set() # allowed access
 
 #===============================================================================
@@ -65,10 +62,11 @@ def send_img(path):
 
 @app.route('/img_db/<string:path>')
 def send_img_db(path):
-    print(path)
     # return send_from_directory('images/memes_tw/class0', path)
-    img_dict[path].seek(0)
-    return send_file(img_dict[path], mimetype='image/jpeg')
+    mem = io.BytesIO()
+    mem.write(img_dict[path])
+    mem.seek(0)
+    return send_file(mem, mimetype='image/jpeg')
 
 #===============================================================================
 # socket
