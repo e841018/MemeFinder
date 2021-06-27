@@ -64,7 +64,7 @@ if RUN_TSNE:
     with open('tsne_memes_tw.pkl', 'wb') as f:
         pickle.dump(features_embedded, f)
 else:
-    with open('tsne_test.pkl', 'rb') as f:
+    with open('ImgVector/tsne_test.pkl', 'rb') as f:
         features_embedded = pickle.load(f)
 
 from time import time
