@@ -127,7 +127,17 @@ for sid, (event_dict, logs) in sid_dict.items():
     #     data = log['submission']
 
 from matplotlib import pyplot as plt
-n_subj = len(sid_dict)
+def scatter_x_y(ax, valx, valy):
+    lim = max(np.max(valx), np.max(valy)) * 1.1
+    ax.set_aspect(1)
+    ax.scatter(valx, valy)
+    ax.plot([0, lim], [0, lim], 'k:')
+    ax.set_xlim((0, lim))
+    ax.set_ylim((0, lim))
+    ax.set_xlabel('OCR+tag')
+    ax.set_ylabel('OCR-only')
+
+# %% figure for log
 def mean_if_not_inf(seq):
     vs = []
     for v in seq[:10]:
@@ -136,45 +146,43 @@ def mean_if_not_inf(seq):
     return np.mean(vs) if len(vs) else float('nan')
 set1_times = [mean_if_not_inf(seq[:10]) for seq in t_seqs]
 set2_times = [mean_if_not_inf(seq[10:]) for seq in t_seqs]
-set1_qcnts = [mean_if_not_inf(seq[:10]) for seq in q_seqs]
-set2_qcnts = [mean_if_not_inf(seq[10:]) for seq in q_seqs]
+set1_skips = [np.sum(seq[:10]==float('inf')) for seq in t_seqs]
+set2_skips = [np.sum(seq[10:]==float('inf')) for seq in t_seqs]
+set1_qcnts = [np.mean(seq[:10]) for seq in q_seqs]
+set2_qcnts = [np.mean(seq[10:]) for seq in q_seqs]
 
-# %%
+fig, axs = plt.subplots(1, 3, figsize=(10, 2.6))
 
-fig, axs = plt.subplots(1, 2, figsize=(7, 3))
+scatter_x_y(axs[0], set1_times, set2_times)
+axs[0].set_title('Average time spent [sec]')
 
-# first subplot
+scatter_x_y(axs[1], set1_qcnts, set2_qcnts)
+axs[1].set_title('Average query count')
 
-valx, valy = set1_times, set2_times
-ax = axs[0]
-
-lim = max(np.max([v for v in valx if v!=float('inf')]),
-          np.max([v for v in valy if v!=float('inf')])) * 1.1
-ax.set_aspect(1)
-ax.scatter(valx, valy)
-ax.plot([0, lim], [0, lim], 'k:')
-ax.set_xlim((0, lim))
-ax.set_ylim((0, lim))
-ax.set_xlabel('OCR+tag')
-ax.set_ylabel('OCR-only')
-
-ax.set_title('Average time spent [sec]')
-
-# second subplot
-
-valx, valy = set1_qcnts, set2_qcnts
-ax = axs[1]
-
-lim = max(np.max([v for v in valx if v!=float('inf')]),
-          np.max([v for v in valy if v!=float('inf')])) * 1.1
-ax.set_aspect(1)
-ax.scatter(valx, valy)
-ax.plot([0, lim], [0, lim], 'k:')
-ax.set_xlim((0, lim))
-ax.set_ylim((0, lim))
-ax.set_xlabel('OCR+tag')
-ax.set_ylabel('OCR-only')
-
-ax.set_title('Average query count')
+scatter_x_y(axs[2], set1_skips, set2_skips)
+axs[2].set_title('Number of Skips (total 10)')
     
+# %% figure for feedback spreadsheed
+fb_set1_times = [1.0, 1.0, 0.5, 1.0, 0.5, 1.5, 1/3, 0.5, 0.5, 2.0, 2.0]
+fb_set2_times = [1.0, 1.0, 0.5, 5.0, 1.0, 1.5, 1/6, 1.0, 0.5, 3.0, 3.0]
+fb_set1_qcnts = [15.0, 2.0, 2.0, 4.0, 2.0, 2.5, 2.0, 2.0, 2.0, 4.0, 4.0]
+fb_set2_qcnts = [10.0, 3.0, 2.0, 10.0, 3.0, 2.5, 1.0, 4.0, 5.0, 6.5, 5.0]
+fb_set1_diffs = [4, 2, 4, 4, 2, 3, 3, 2, 1, 4, 3]
+fb_set2_diffs = [3, 3, 4, 3, 4, 3, 2, 4, 1, 5, 4]
+fb_set1_mfisbetter = [1, -1, 0, 1, 1, -1, -1, 1, 0, -1, 1]
+fb_set2_mfisbetter = [1, -1, 0, 1, 0, -1, 0, -1, -1, -1, 1]
+
+fig, axs = plt.subplots(1, 3, figsize=(10, 2.7))
+
+scatter_x_y(axs[0], fb_set1_times, fb_set2_times)
+axs[0].set_title('Percieved time spent [sec]')
+
+scatter_x_y(axs[1], fb_set1_qcnts, fb_set2_qcnts)
+axs[1].set_title('Percieved query count')
+
+scatter_x_y(axs[2], fb_set1_diffs, fb_set2_diffs)
+axs[2].set_title('Percieved difficulty')
+
+print(np.mean(np.array(fb_set1_mfisbetter) > 0),
+      np.mean(np.array(fb_set2_mfisbetter) > 0))
 # %%
